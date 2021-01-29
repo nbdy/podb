@@ -22,7 +22,8 @@ mongo style database for python objects
 - upsert
 - upsert_many
 - size
-## indexed datatypes
+## requirements
+- [dataset](https://dataset.readthedocs.io/en/latest/)
 ## example
 ```python
 from podb import DB, DBEntry
