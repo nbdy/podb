@@ -5,9 +5,6 @@ from uuid import uuid4
 from datetime import datetime
 
 
-TIMESTAMP_FMT = "%d.%m.%Y %H:%M:%S"
-
-
 class DBEntry(object):
     def __init__(self, **kwargs):
         self.uuid = str(uuid4())
@@ -16,8 +13,8 @@ class DBEntry(object):
         self.__dict__.update(kwargs)
 
     @staticmethod
-    def get_timestamp(fmt=TIMESTAMP_FMT):
-        return datetime.now().strftime(fmt)
+    def get_timestamp():
+        return datetime.now().isoformat()
 
 
 class Serializer(object):
@@ -64,6 +61,9 @@ class DB(object):
             r = f(*args, **kwargs)
         return r
 
+    def _query(self, qry: str, params):
+        return self._exec(self.db.query, [qry], params)
+
     def _t(self, n: str) -> dataset.Table:
         return self.db[n]
 
@@ -75,6 +75,11 @@ class DB(object):
 
     def get_by_uuid(self, tbl: str, uuid: str):
         return self.get_by(tbl, {"uuid": uuid})
+
+    def get_after(self, tbl: str, after: str):
+        return self._query("select * from :tbl where last_updated >= date(:ts);", {
+            "tbl": tbl, "ts": after
+        })
 
     def contains(self, tbl: str, key: str, value):
         return self._exec(self._t(tbl).count, [], {key: value}) > 0
