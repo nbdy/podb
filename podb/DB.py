@@ -1,5 +1,6 @@
 import dataset
 import pickle
+from multiprocessing import Lock
 from uuid import uuid4
 from datetime import datetime
 
@@ -49,63 +50,61 @@ class Serializer(object):
         return r
 
 
-class Table(object):
-    def __init__(self, table: dataset.Table, serializer: Serializer = Serializer):
-        self.table = table
-        self.serializer = serializer
+class DB(object):
+    mtx = Lock()
+    ser: Serializer = None
 
-    def get_by(self, fltr: dict):
-        r = self.table.find_one(**fltr)
+    def __init__(self, name: str, serializer: Serializer = Serializer):
+        self.ser = serializer
+        self.db = dataset.connect("sqlite:///{}.db".format(name), engine_kwargs={"connect_args":
+                                                                                     {"check_same_thread": False}})
+
+    def _exec(self, f, args, kwargs):
+        with self.mtx:
+            r = f(*args, **kwargs)
+        return r
+
+    def _t(self, n: str) -> dataset.Table:
+        return self.db[n]
+
+    def get_by(self, tbl: str, fltr: dict):
+        r = self._exec(self._t(tbl).find_one, [], fltr)
         if r:
             r = pickle.loads(r["object"])
         return r
 
-    def get_by_uuid(self, uuid: str):
-        return self.get_by({"uuid": uuid})
+    def get_by_uuid(self, tbl: str, uuid: str):
+        return self.get_by(tbl, {"uuid": uuid})
 
-    def contains(self, key: str, value):
-        return self.table.count(**{key: value}) > 0
+    def contains(self, tbl: str, key: str, value):
+        return self._exec(self._t(tbl).count, [], {key: value}) > 0
 
     def serialize(self, o: DBEntry):
-        return self.serializer.serialize(o)
+        return self.ser.serialize(o)
 
     def serialize_many(self, lst: list[DBEntry]):
-        return self.serializer.serialize_many(lst)
+        return self.ser.serialize_many(lst)
 
-    def size(self):
-        return len(self.table)
+    def size(self, tbl: str):
+        return len(self._t(tbl))
 
-    def count(self, key: str, value):
-        return self.table.count(**{key: value})
+    def count(self, tbl: str, key: str, value):
+        return self._exec(self._t(tbl).count, [], {key: value})
 
-    def insert(self, o: DBEntry):
-        self.table.insert(self.serialize(o))
+    def insert(self, tbl: str, o: DBEntry):
+        self._exec(self._t(tbl).insert, [self.serialize(o)], {})
 
-    def insert_many(self, lst: list[DBEntry]):
-        self.table.insert_many(self.serialize_many(lst))
+    def insert_many(self, tbl: str, lst: list[DBEntry]):
+        self._exec(self._t(tbl).insert_many, [self.serialize_many(lst)], {})
 
-    def update(self, o: DBEntry):
-        self.table.update(self.serialize(o), ["uuid"])
+    def update(self, tbl: str, o: DBEntry):
+        self._exec(self._t(tbl).update, [self.serialize(o), ["uuid"]], {})
 
-    def upsert(self, o: DBEntry):
-        self.table.upsert(self.serialize(o), ["uuid"])
+    def upsert(self, tbl: str, o: DBEntry):
+        self._exec(self._t(tbl).upsert, [self.serialize(o), ["uuid"]], {})
 
-    def upsert_many(self, lst: list[DBEntry]):
-        self.table.upsert_many(self.serialize_many(lst), ["uuid"])
+    def upsert_many(self, tbl: str, lst: list[DBEntry]):
+        self._exec(self._t(tbl).upsert_many, [self.serialize_many(lst), ["uuid"]], {})
 
-    def delete(self, o: DBEntry):
-        if self.contains("uuid", o.uuid):
-            self.table.delete(**{"uuid": o.uuid})
-            return True
-        return False
-
-
-class DB(object):
-    def __init__(self, name: str):
-        self.db = dataset.connect("sqlite:///{}.db".format(name))
-
-    def table(self, name: str) -> Table:
-        return Table(self.db[name])
-
-    def t(self, name: str) -> Table:
-        return self.table(name)
+    def delete(self, tbl: str, o: DBEntry):
+        self._exec(self._t(tbl).delete, [], {"uuid": o.uuid})
