@@ -43,21 +43,21 @@ class Customer(DBEntry):
         self.companies = companies
 
 db = DB("customers")
-tbl = db.t("private_data")  # or db.table()
+tbl = "customers"
 
 c0 = Customer("Jeff", "Bezoz", 42, 1.69, 
               [Company("Whole Foods"), Company("Zappos"), 
                Company("Ring"), Company("twitch")])
-tbl.insert(c0)
+db.insert(tbl, c0)
 
-c0 = tbl.get_by({
+c0 = db.get_by(tbl, {
     "first_name": "Jeff",
     "last_name": "Bezoz"
 })
 
 c0.companies.append(Company("Audible"))
 
-tbl.update(c0)
+db.update(tbl, c0)
 ```
 ## installation
 ```shell
