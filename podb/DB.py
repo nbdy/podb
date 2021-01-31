@@ -117,6 +117,14 @@ class DB(object):
         with self.mtx:
             self.db[tbl].update(self.serialize(o), ["uuid"])
 
+    def upsert(self, tbl: str, o: DBEntry):
+        with self.mtx:
+            self.db[tbl].upsert(self.serialize(o), ["uuid"])
+
+    def upsert_many(self, tbl: str, lst: list[DBEntry]):
+        with self.mtx:
+            self.db[tbl].upsert_many(self.serialize_many(lst), ["uuid"])
+
     def remove(self, tbl: str, o: DBEntry):
         with self.mtx:
             self.db[tbl].delete(**{"uuid": o.uuid})
