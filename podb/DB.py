@@ -1,20 +1,23 @@
-import dataset
 import pickle
 from multiprocessing import Lock
 from uuid import uuid4
+import dataset
 from datetime import datetime
+
+
+FMT_TIMESTAMP = "%Y.%m.%d %H:%M:%S"
 
 
 class DBEntry(object):
     def __init__(self, **kwargs):
         self.uuid = str(uuid4())
         self.created = self.get_timestamp()
-        self.last_updated = self.created
+        self.last_modified = self.created
         self.__dict__.update(kwargs)
 
     @staticmethod
-    def get_timestamp():
-        return datetime.now().isoformat()
+    def get_timestamp(fmt=FMT_TIMESTAMP):
+        return datetime.now().strftime(fmt)
 
 
 class Serializer(object):
@@ -25,7 +28,7 @@ class Serializer(object):
             # "functions": []
         }
         for k, v in obj.__dict__.items():
-            for t in [str, int, float, bytes, bool, complex]:
+            for t in [str, int, float, bytes, bool, complex, datetime]:
                 if isinstance(v, t):
                     ctx[k] = v
             '''
@@ -48,41 +51,43 @@ class Serializer(object):
 
 
 class DB(object):
-    mtx = Lock()
+    mtx: Lock = Lock()
     ser: Serializer = None
 
     def __init__(self, name: str, serializer: Serializer = Serializer):
         self.ser = serializer
-        self.db = dataset.connect("sqlite:///{}.db".format(name), engine_kwargs={"connect_args":
-                                                                                     {"check_same_thread": False}})
+        self.db = dataset.connect("sqlite:///{}.db".format(name),
+                                  engine_kwargs={"connect_args": {"check_same_thread": False}})
 
-    def _exec(self, f, args, kwargs):
-        with self.mtx:
-            r = f(*args, **kwargs)
-        return r
-
-    def _query(self, qry: str, params):
-        return self._exec(self.db.query, [qry], params)
-
-    def _t(self, n: str) -> dataset.Table:
-        return self.db[n]
-
-    def get_by(self, tbl: str, fltr: dict):
-        r = self._exec(self._t(tbl).find_one, [], fltr)
+    @staticmethod
+    def get_object(r):
         if r:
-            r = pickle.loads(r["object"])
+            return pickle.loads(r["object"])
+        return None
+
+    def get_by(self, tbl: str, key: str, value):
+        r = []
+        for i in self.db[tbl].find(**{key: value}):
+            r.append(self.get_object(i))
         return r
+
+    def get_one_by(self, tbl: str, key: str, value):
+        return self.get_object(self.db[tbl].find_one(**{key: value}))
 
     def get_by_uuid(self, tbl: str, uuid: str):
-        return self.get_by(tbl, {"uuid": uuid})
+        return self.get_one_by(tbl, "uuid", uuid)
 
-    def get_after(self, tbl: str, after: str):
-        return self._query("select * from :tbl where last_updated >= date(:ts);", {
-            "tbl": tbl, "ts": after
-        })
+    def get_after(self, tbl: str, after: datetime):
+        with self.mtx:
+            t = self.db[tbl]
+            r = t.find(t.table.columns.last_modified >= after.strftime(FMT_TIMESTAMP))
+        print(r)
+        return r
 
     def contains(self, tbl: str, key: str, value):
-        return self._exec(self._t(tbl).count, [], {key: value}) > 0
+        with self.mtx:
+            r = self.db[tbl].count(**{key: value})
+        return r > 0
 
     def serialize(self, o: DBEntry):
         return self.ser.serialize(o)
@@ -91,25 +96,27 @@ class DB(object):
         return self.ser.serialize_many(lst)
 
     def size(self, tbl: str):
-        return len(self._t(tbl))
+        with self.mtx:
+            r = self.db[tbl].count(**{})
+        return r
 
     def count(self, tbl: str, key: str, value):
-        return self._exec(self._t(tbl).count, [], {key: value})
+        with self.mtx:
+            r = self.db[tbl].count(**{key: value})
+        return r
 
     def insert(self, tbl: str, o: DBEntry):
-        self._exec(self._t(tbl).insert, [self.serialize(o)], {})
+        with self.mtx:
+            self.db[tbl].insert(self.serialize(o))
 
     def insert_many(self, tbl: str, lst: list[DBEntry]):
-        self._exec(self._t(tbl).insert_many, [self.serialize_many(lst)], {})
+        with self.mtx:
+            self.db[tbl].insert_many(self.serialize_many(lst))
 
     def update(self, tbl: str, o: DBEntry):
-        self._exec(self._t(tbl).update, [self.serialize(o), ["uuid"]], {})
+        with self.mtx:
+            self.db[tbl].update(self.serialize(o), ["uuid"])
 
-    def upsert(self, tbl: str, o: DBEntry):
-        self._exec(self._t(tbl).upsert, [self.serialize(o), ["uuid"]], {})
-
-    def upsert_many(self, tbl: str, lst: list[DBEntry]):
-        self._exec(self._t(tbl).upsert_many, [self.serialize_many(lst), ["uuid"]], {})
-
-    def delete(self, tbl: str, o: DBEntry):
-        self._exec(self._t(tbl).delete, [], {"uuid": o.uuid})
+    def remove(self, tbl: str, o: DBEntry):
+        with self.mtx:
+            self.db[tbl].delete(**{"uuid": o.uuid})
