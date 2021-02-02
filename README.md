@@ -1,6 +1,7 @@
 # podb
 ### (p)ython (o)bject (d)ata(b)ase
-mongo style database for python objects
+thread safe mongo style database for python objects<br>
+(it's a sqlite db)
 ## indexed types
 - str
 - int
@@ -11,7 +12,7 @@ mongo style database for python objects
 ## procedure
 - saves supported data types as columns
 - pickles the actual object and saves that as a string
-- when select matches one of the columns, the object is unpickled and returned
+- when select matches, the object is unpickled and returned
 ## functions
 - get_by
 - get_by_uuid
@@ -31,6 +32,7 @@ from podb import DB, DBEntry
 
 class Company(DBEntry):
     def __init__(self, name: str):
+        DBEntry.__init__(self)
         self.name = name
 
 class Customer(DBEntry):
