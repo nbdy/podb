@@ -77,11 +77,14 @@ class DB(object):
     def get_by_uuid(self, tbl: str, uuid: str):
         return self.get_one_by(tbl, "uuid", uuid)
 
-    def get_after(self, tbl: str, after: datetime):
+    def get_after(self, tbl: str, after: datetime, count: int = 10):
         with self.mtx:
             t = self.db[tbl]
-            r = t.find(t.table.columns.last_modified >= after.strftime(FMT_TIMESTAMP))
-        print(r)
+            d = t.find(t.table.columns.last_modified >= after.strftime(FMT_TIMESTAMP), _limit=count,
+                       order_by=["last_modified"])
+        r = []
+        for i in d:
+            r.append(self.get_object(i))
         return r
 
     def contains(self, tbl: str, key: str, value):
@@ -99,6 +102,12 @@ class DB(object):
         with self.mtx:
             r = self.db[tbl].count(**{})
         return r
+
+    def get_tables(self):
+        return self.db.tables
+
+    def get_columns(self, tbl: str):
+        return self.db[tbl].columns
 
     def count(self, tbl: str, key: str, value):
         with self.mtx:
