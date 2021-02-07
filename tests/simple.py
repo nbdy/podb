@@ -5,11 +5,10 @@ from string import printable
 from threading import Thread
 from multiprocessing import Queue
 import unittest
-import pickle
 from time import time, sleep
 from datetime import datetime
+from copy import deepcopy
 
-TBL = "test"
 db = DB("test")
 
 
@@ -33,52 +32,44 @@ class DBTestMethods(unittest.TestCase):
     def test_insert(self):
         print("test_insert")
         to = TestObject.random()
-        b = db.size(TBL)
-        db.insert(TBL, to)
-        a = db.size(TBL)
-        self.assertGreater(a, b, "DB entry count increased")
+        b = db.size()
+        db.insert(to)
+        a = db.size()
+        self.assertGreater(a, b, "DB entry count did not increase")
 
     def test_get_by(self):
         print("test_get_by")
         to = TestObject.random()
-        db.insert(TBL, to)
-        ti = db.get_one_by(TBL, "name", to.name)
-        self.assertIsNotNone(ti, "get_kv returned not None")
-        self.assertEqual(ti.uuid, to.uuid, "Inserted and retrieved object uuids are the same")
-
-    def test_get_by_object(self):
-        print("test_get_by_object")
-        to = TestObject.random()
-        tp = pickle.dumps(to)
-        db.insert(TBL, to)
-        ti = db.get_one_by(TBL, "object", tp)
-        self.assertIsNotNone(ti, "get_kv by object is not None")
-        tip = pickle.dumps(ti)
-        self.assertEqual(tp, tip, "inserted and retrieved pickle representations are equal")
+        db.insert(to)
+        ti = db.find_one({"name": to.name})
+        self.assertIsNotNone(ti, "get_kv returned None")
+        self.assertEqual(ti.uuid, to.uuid, "Inserted and retrieved object uuids are not the same")
 
     def test_get_uuid(self):
         print("test_get_uuid")
         to = TestObject.random()
-        db.insert(TBL, to)
-        ti = db.get_by_uuid(TBL, to.uuid)
-        self.assertIsNotNone(ti, "get_uuid returned not None")
-        self.assertEqual(to.uuid, ti.uuid, "Inserted and retrieved object uuids are the same")
+        db.insert(to)
+        ti = db.find_one({"uuid": to.uuid})
+        self.assertIsNotNone(ti, "get_uuid returned None")
+        self.assertEqual(to.uuid, ti.uuid, "Inserted and retrieved object uuids are not the same")
 
     def test_update(self):
         print("test_update")
-        to = TestObject.random()
-        db.insert(TBL, to), "database insert"
-        toageb = int(to.age)
-        tosizeb = float(to.size)
-        to.age *= 2
-        to.size *= 2
-        self.assertNotEqual(toageb, to.age, "doubled the age")
-        self.assertNotEqual(tosizeb, to.size, "doubled the size")
-        db.update(TBL, to)
-        ti = db.get_by_uuid(TBL, to.uuid)
-        self.assertIsNotNone(ti, "get_uuid returned not None")
-        self.assertGreater(ti.size, tosizeb, "greater than original objects age")
-        self.assertGreater(ti.age, toageb, "greater than original objects age")
+        t0 = TestObject.random()
+        db.insert(t0)
+        t1 = deepcopy(t0)
+        t0.age *= 2
+        t0.size *= 2
+        print(t1.age, t1.size)
+        print(t0.age, t0.size)
+        self.assertGreater(t0.age, t1.age, "age is not greater than before")
+        self.assertGreater(t0.size, t1.size, "size is not greater than before")
+        self.assertTrue(db.update(t0), "update failed")
+        del t0
+        t0 = db.find_by_uuid(t1.uuid)
+        self.assertIsNotNone(t0, "get_uuid returned None")
+        self.assertGreater(t0.size, t1.size, "not greater than original objects age")
+        self.assertGreater(t0.age, t1.age, "not greater than original objects age")
 
     def test_timings(self):
         print("test_timings")
@@ -88,7 +79,7 @@ class DBTestMethods(unittest.TestCase):
             avg = 0
             for _ in range(n):
                 start = time()
-                db.insert(TBL, TestObject.random())
+                db.insert(TestObject.random())
                 stop = time()
                 d = (stop - start)
                 avg += d
@@ -111,8 +102,8 @@ class DBTestMethods(unittest.TestCase):
         sleep(1)
         t0 = TestObject.random()
         t1 = TestObject.random()
-        db.insert_many(TBL, [t0, t1])
-        r = db.get_after(TBL, now)
+        db.insert_many([t0, t1])
+        r = db.find_after(now)
         self.assertIsNotNone(r, "get_after returned something")
 
 
