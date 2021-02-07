@@ -4,42 +4,38 @@ podb
 (p)ython (o)bject (d)ata(b)ase
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-thread safe mongo style database for python objects (it's a sqlite db)
+thread safe redis style database for python objects
 
-indexed types
--------------
+reasons to use this
+-------------------
 
--  str
--  int
--  float
--  bytes
--  bool
--  complex
-
-procedure
----------
-
--  saves supported data types as columns
--  pickles the actual object and saves that as a string
--  when select matches, the object is unpickled and returned
+-  thread safe
+-  stores python objects
+-  filters, see below
+-  `inserting 200 objects takes ~0.0003 seconds`_ (i7-4702MQ)
+-  size of db with 800 objects is ~600kB
 
 functions
 ---------
 
--  get_by
--  get_by_uuid
--  contains
+-  find
+-  find_one
+-  find_after
+-  find_before
+-  find_by_uuid
 -  insert
 -  insert_many
 -  update
+-  update_many
 -  upsert
 -  upsert_many
 -  size
+-  contains
 
 requirements
 ------------
 
--  `dataset`_
+-  None
 
 example
 -------
@@ -64,27 +60,26 @@ example
            self.companies = companies
 
    db = DB("customers")
-   tbl = "customers"
 
    c0 = Customer("Jeff", "Bezoz", 42, 1.69,
                  [Company("Whole Foods"), Company("Zappos"),
                   Company("Ring"), Company("twitch")])
-   db.insert(tbl, c0)
+   db.insert(c0)
 
-   c0 = db.get_by(tbl, {
+   c0 = db.find_one({
        "first_name": "Jeff",
        "last_name": "Bezoz"
    })
 
    c0.companies.append(Company("Audible"))
 
-   db.update(tbl, c0)
+   db.update(c0)
 
 installation
 ------------
 
 .. code:: shell
 
-   pip3 install git+https://github.com/nbdy/podb
+   pip3 install podb
 
-.. _dataset: https://dataset.readthedocs.io/en/latest/
+.. _inserting 200 objects takes ~0.0003 seconds: tests/simple.py#L74
