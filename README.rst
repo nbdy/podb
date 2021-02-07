@@ -14,6 +14,8 @@ reasons to use this
 -  filters, see below
 -  `inserting 200 objects takes ~0.0003 seconds`_ (i7-4702MQ)
 -  size of db with 800 objects is ~600kB
+- ~120 loc
+- no extra package dependencies
 
 functions
 ---------

@@ -7,6 +7,8 @@ thread safe redis style database for python objects<br>
 - filters, see below
 - [inserting 200 objects takes ~0.0003 seconds](tests/simple.py#L74) (i7-4702MQ)
 - size of db with 800 objects is ~600kB 
+- ~120 loc
+- no extra package dependencies
 ## functions
 - find
 - find_one
@@ -21,8 +23,6 @@ thread safe redis style database for python objects<br>
 - upsert_many
 - size
 - contains
-## requirements
-- None
 ## example
 ```python
 from podb import DB, DBEntry
