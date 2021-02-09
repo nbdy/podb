@@ -5,16 +5,20 @@ thread safe redis style database for python objects<br>
 - thread safe
 - stores python objects
 - filters, see below
-- [inserting 200 objects takes ~0.0003 seconds](tests/simple.py#L74) (i7-4702MQ)
+- [inserting 200 objects takes ~0.0003 seconds](tests/all.py#L74) (i7-4702MQ)
 - size of db with 800 objects is ~600kB 
 - ~120 loc
 - no extra package dependencies
+- [tes](tests/all.py)[ted](tests/huge.py)
 ## functions
 - find
 - find_one
 - find_after
 - find_before
 - find_by_uuid
+- find_contains
+- find_startswith
+- find_endswith
 - insert
 - insert_many
 - update
@@ -23,6 +27,11 @@ thread safe redis style database for python objects<br>
 - upsert_many
 - size
 - contains
+- columns
+- drop
+- remove / delete
+- remove_by_uuid / delete_by_uuid
+- delete_before
 ## example
 ```python
 from podb import DB, DBEntry

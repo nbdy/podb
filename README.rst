@@ -25,6 +25,9 @@ functions
 -  find_after
 -  find_before
 -  find_by_uuid
+-  find_contains
+-  find_startswith
+-  find_endswith
 -  insert
 -  insert_many
 -  update
@@ -33,11 +36,11 @@ functions
 -  upsert_many
 -  size
 -  contains
-
-requirements
-------------
-
--  None
+-  columns
+-  drop
+-  remove / delete
+-  remove_by_uuid / delete_by_uuid
+-  delete_before
 
 example
 -------
