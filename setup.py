@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     long_description=open("README.rst", "r").read(),
     name="podb",
-    version="1.33.7",
+    version="1.42.0",
     description="python object database",
     author="Pascal Eberlein",
     author_email="pascal@eberlein.io",
@@ -17,5 +17,5 @@ setup(
     ],
     keywords="python object database",
     packages=find_packages(),
-    install_requires=open("requirements.txt").readlines()
+    install_requires=["setuptools"]
 )
