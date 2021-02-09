@@ -37,20 +37,22 @@ class DBTestMethods(unittest.TestCase):
         a = db.size()
         self.assertGreater(a, b, "DB entry count did not increase")
 
-    def test_get_by(self):
-        print("test_get_by")
+    def test_find(self):
+        print("test_find")
         to = TestObject.random()
-        db.insert(to)
+        self.assertTrue(db.insert(to), "insert was not successful")
+        self.assertGreater(db.size(), 0, "database count is still 0")
         ti = db.find_one({"name": to.name})
-        self.assertIsNotNone(ti, "get_kv returned None")
+        print("Found:", ti)
+        self.assertIsNotNone(ti, "find_one returned None")
         self.assertEqual(ti.uuid, to.uuid, "Inserted and retrieved object uuids are not the same")
 
-    def test_get_uuid(self):
-        print("test_get_uuid")
+    def test_find_by_uuid(self):
+        print("test_find_by_uuid")
         to = TestObject.random()
         db.insert(to)
-        ti = db.find_one({"uuid": to.uuid})
-        self.assertIsNotNone(ti, "get_uuid returned None")
+        ti = db.find_by_uuid(to.uuid)
+        self.assertIsNotNone(ti, "find_by_uuid returned None")
         self.assertEqual(to.uuid, ti.uuid, "Inserted and retrieved object uuids are not the same")
 
     def test_update(self):
@@ -60,18 +62,17 @@ class DBTestMethods(unittest.TestCase):
         t1 = deepcopy(t0)
         t0.age *= 2
         t0.size *= 2
-        print(t1.age, t1.size)
-        print(t0.age, t0.size)
         self.assertGreater(t0.age, t1.age, "age is not greater than before")
         self.assertGreater(t0.size, t1.size, "size is not greater than before")
         self.assertTrue(db.update(t0), "update failed")
         del t0
         t0 = db.find_by_uuid(t1.uuid)
-        self.assertIsNotNone(t0, "get_uuid returned None")
+        self.assertIsNotNone(t0, "find_by_uuid returned None")
         self.assertGreater(t0.size, t1.size, "not greater than original objects age")
         self.assertGreater(t0.age, t1.age, "not greater than original objects age")
 
     def test_timings(self):
+        db.drop()
         print("test_timings")
         avg_queue = Queue()
 
@@ -94,7 +95,9 @@ class DBTestMethods(unittest.TestCase):
         for _ in t:
             _.join()
         while not avg_queue.empty():
-            self.assertLess(avg_queue.get(), 0.2, "processing time is lesser than 0.2 seconds")
+            avg_result = avg_queue.get()
+            self.assertLess(avg_result, 0.2, "processing time is lesser than 0.2 seconds")
+        self.assertEqual(db.size(), 800, "db has size of {0} not 800".format(db.size()))
 
     def test_get_after(self):
         print("test_get_after")
@@ -108,4 +111,5 @@ class DBTestMethods(unittest.TestCase):
 
 
 if __name__ == '__main__':
+    db.drop()
     unittest.main()
