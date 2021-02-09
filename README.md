@@ -2,7 +2,7 @@
 ### (p)ython (o)bject (d)ata(b)ase
 thread safe redis style database for python objects<br>
 ## reasons to use this
-- thread safe
+- [thread safe](tests/threaded.py)
 - stores python objects
 - filters, see below
 - [inserting 200 objects takes ~0.0003 seconds](tests/all.py#L74) (i7-4702MQ)
@@ -10,6 +10,10 @@ thread safe redis style database for python objects<br>
 - ~120 loc
 - no extra package dependencies
 - [tes](tests/all.py)[ted](tests/huge.py)
+- [10-11k inserts per second](tests/huge.py)
+## notes
+- [1 million entry db is 1.3GB](tests/huge.db)
+- [not multiprocess safe (yet?)](tests/processed.py)
 ## functions
 - find
 - find_one

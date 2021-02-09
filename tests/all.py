@@ -43,7 +43,6 @@ class DBTestMethods(unittest.TestCase):
         self.assertTrue(db.insert(to), "insert was not successful")
         self.assertGreater(db.size(), 0, "database count is still 0")
         ti = db.find_one({"name": to.name})
-        print("Found:", ti)
         self.assertIsNotNone(ti, "find_one returned None")
         self.assertEqual(ti.uuid, to.uuid, "Inserted and retrieved object uuids are not the same")
 
