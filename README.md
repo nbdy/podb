@@ -1,10 +1,10 @@
 
 # podb
 
-[![Build Status](https://build.eberlein.io/view/python/job/python_podb/badge/icon)](https://build.eberlein.io/view/python/job/python_podb/)
+[![Build Status](https://build.eberlein.io/buildStatus/icon?job=python_podb)](https://build.eberlein.io/view/python/job/python_podb/)
 [![Maintainability](https://api.codeclimate.com/v1/badges/4c7092020ba5916cd90b/maintainability)](https://codeclimate.com/github/nbdy/podb/maintainability)
 
-### (p)ython (o)bject (d)ata(b)ase
+## (p)ython (o)bject (d)ata(b)ase
 
 thread safe redis style database for python objects
 
@@ -61,7 +61,7 @@ class Company(DBEntry):
         self.name = name
 
 class Customer(DBEntry):
-    def __init__(self, first_name: str, last_name: str, age: int, 
+    def __init__(self, first_name: str, last_name: str, age: int,
                  height: float, companies: list[DBEntry]):
         DBEntry.__init__(self)
         self.first_name = first_name
@@ -72,7 +72,7 @@ class Customer(DBEntry):
 
 db = DB("customers")
 
-c0 = Customer("Jeff", "Bezoz", 42, 1.69, 
+c0 = Customer("Jeff", "Bezoz", 42, 1.69,
               [Company("Whole Foods"), Company("Zappos"),
                Company("Ring"), Company("twitch")])
 db.insert(c0)
