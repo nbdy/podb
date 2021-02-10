@@ -120,9 +120,9 @@ class DB(object):
         return self.match(fltr, n)
 
     def find_startswith(self, key: str, value: str, n=0):
-        def f(v: dict):
+        def fltr(v: dict):
             return v[key].startswith(value)
-        return self.match(f, n)
+        return self.match(fltr, n)
 
     def find_endswith(self, key: str, value: str, n=0):
         def fltr(v: dict):
@@ -160,4 +160,3 @@ class DB(object):
     def delete_before(self, before: datetime, key="created"):
         for i in self.find_after(before, key):
             self.remove_by_uuid(i.uuid)
-
