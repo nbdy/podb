@@ -9,13 +9,21 @@ thread safe redis style database for python objects
 reasons to use this
 -------------------
 
--  thread safe
+-  `thread safe`_
 -  stores python objects
 -  filters, see below
 -  `inserting 200 objects takes ~0.0003 seconds`_ (i7-4702MQ)
 -  size of db with 800 objects is ~600kB
-- ~120 loc
-- no extra package dependencies
+-  ~120 loc
+-  no extra package dependencies
+-  `tes`_\ `ted`_
+-  `10-11k inserts per second`_ (i7-4702MQ)
+
+notes
+-----
+
+-  `1 million entry db is 1.3GB`_
+-  `not multiprocess safe (yet?)`_
 
 functions
 ---------
@@ -87,4 +95,10 @@ installation
 
    pip3 install podb
 
-.. _inserting 200 objects takes ~0.0003 seconds: tests/simple.py#L74
+.. _thread safe: tests/threaded.py
+.. _inserting 200 objects takes ~0.0003 seconds: tests/all.py#L74
+.. _tes: tests/all.py
+.. _ted: tests/huge.py
+.. _10-11k inserts per second: tests/huge.py
+.. _1 million entry db is 1.3GB: tests/huge.db
+.. _not multiprocess safe (yet?): tests/processed.py

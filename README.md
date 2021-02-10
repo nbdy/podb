@@ -10,7 +10,7 @@ thread safe redis style database for python objects<br>
 - ~120 loc
 - no extra package dependencies
 - [tes](tests/all.py)[ted](tests/huge.py)
-- [10-11k inserts per second](tests/huge.py)
+- [10-11k inserts per second](tests/huge.py) (i7-4702MQ)
 ## notes
 - [1 million entry db is 1.3GB](tests/huge.db)
 - [not multiprocess safe (yet?)](tests/processed.py)
