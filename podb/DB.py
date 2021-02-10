@@ -91,9 +91,9 @@ class DB(object):
         return r
 
     def find(self, query: dict, n=0) -> list:
-        def f(v: dict):
+        def fltr(v: dict):
             return self.k_v_match(v, query)
-        return self.match(f, n)
+        return self.match(fltr, n)
 
     def find_by_uuid(self, uuid):
         return self.db.get(uuid)
@@ -105,19 +105,19 @@ class DB(object):
         return None
 
     def find_after(self, timestamp: datetime, key="created", n=0) -> list:
-        def f(v: dict):
+        def fltr(v: dict):
             return v[key] > timestamp
-        return self.match(f, n)
+        return self.match(fltr, n)
 
     def find_before(self, timestamp: datetime, key="created", n=0) -> list:
-        def f(v: dict):
+        def fltr(v: dict):
             return v[key] < timestamp
-        return self.match(f, n)
+        return self.match(fltr, n)
 
     def find_contains(self, key: str, value: str, n=0):
-        def f(v: dict):
+        def fltr(v: dict):
             return value in v[key]
-        return self.match(f, n)
+        return self.match(fltr, n)
 
     def find_startswith(self, key: str, value: str, n=0):
         def f(v: dict):
@@ -125,9 +125,9 @@ class DB(object):
         return self.match(f, n)
 
     def find_endswith(self, key: str, value: str, n=0):
-        def f(v: dict):
+        def fltr(v: dict):
             return v[key].endswith(value)
-        return self.match(f, n)
+        return self.match(fltr, n)
 
     def size(self):
         return len(self.db.keys())
