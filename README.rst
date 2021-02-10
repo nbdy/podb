@@ -66,7 +66,8 @@ example
            self.name = name
 
    class Customer(DBEntry):
-       def __init__(self, first_name: str, last_name: str, age: int, height: float, companies: list[DBEntry]):
+       def __init__(self, first_name: str, last_name: str, age: int,
+                    height: float, companies: list[DBEntry]):
            DBEntry.__init__(self)
            self.first_name = first_name
            self.last_name = last_name
