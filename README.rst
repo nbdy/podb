@@ -1,6 +1,8 @@
 podb
 ====
 
+|Build Status| |Maintainability|
+
 (p)ython (o)bject (d)ata(b)ase
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -102,3 +104,8 @@ installation
 .. _10-11k inserts per second: tests/huge.py
 .. _1 million entry db is 1.3GB: tests/huge.db
 .. _not multiprocess safe (yet?): tests/processed.py
+
+.. |Build Status| image:: https://build.eberlein.io/view/python/job/python_podb/badge/icon
+   :target: https://build.eberlein.io/view/python/job/python_podb/
+.. |Maintainability| image:: https://api.codeclimate.com/v1/badges/4c7092020ba5916cd90b/maintainability
+   :target: https://codeclimate.com/github/nbdy/podb/maintainability

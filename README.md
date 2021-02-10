@@ -1,4 +1,6 @@
 # podb
+[![Build Status](https://build.eberlein.io/view/python/job/python_podb/badge/icon)](https://build.eberlein.io/view/python/job/python_podb/)
+[![Maintainability](https://api.codeclimate.com/v1/badges/4c7092020ba5916cd90b/maintainability)](https://codeclimate.com/github/nbdy/podb/maintainability)
 ### (p)ython (o)bject (d)ata(b)ase
 thread safe redis style database for python objects<br>
 ## reasons to use this
