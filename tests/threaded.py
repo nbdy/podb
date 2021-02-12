@@ -1,36 +1,12 @@
 from runnable import Runnable
 import unittest
-from podb import DBEntry, DB
-from random import choices, randint, uniform, choice
-from datetime import datetime
-from string import ascii_lowercase
+from podb import DB
 from time import time
 from tqdm import tqdm
+from . import HugeDBItem
 
 
 db = DB("threaded")
-
-
-class HugeDBItem(DBEntry):
-    def __init__(self, name: str, age: int, height: float, weight: float, color: str, birth_date: datetime):
-        DBEntry.__init__(self)
-        self.name = name
-        self.age = age
-        self.height = height
-        self.weight = weight
-        self.color = color
-        self.birth_date = birth_date
-
-    @staticmethod
-    def random():
-        return HugeDBItem(
-            ''.join(choices(ascii_lowercase, k=30)),
-            randint(1, 99),
-            uniform(1.0, 250.0),
-            uniform(1.0, 600.0),
-            choice(["black", "white", "brown", "really?"]),
-            datetime.now()
-        )
 
 
 class ThreadedInserter(Runnable):

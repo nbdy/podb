@@ -1,31 +1,13 @@
-from podb import DB, DBEntry
-
-from random import choice, randint, uniform
-from string import printable
+from podb import DB
 from threading import Thread
 from multiprocessing import Queue
 import unittest
 from time import time, sleep
 from datetime import datetime
 from copy import deepcopy
+from . import TestObject
 
 db = DB("test")
-
-
-def generate_string(n=20, charset=printable):
-    return ''.join(choice(charset) for _ in range(n))
-
-
-class TestObject(DBEntry):
-    def __init__(self, name: str, age: int, size: float):
-        DBEntry.__init__(self)
-        self.name = name
-        self.age = age
-        self.size = size
-
-    @staticmethod
-    def random():
-        return TestObject(generate_string(), randint(0, 420), uniform(1.4, 2))
 
 
 class DBTestMethods(unittest.TestCase):

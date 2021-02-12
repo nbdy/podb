@@ -6,23 +6,31 @@
 
 ## (p)ython (o)bject (d)ata(b)ase
 
-thread safe redis style database for python objects
+thread safe, file based, redis style database for python objects
+
+## reasons not to use this
+- you want a database cluster
+- you have multiple millions or billions of database entries and limited storage space
+- you need relationships / multiple tables
 
 ## reasons to use this
 
-- [thread safe](tests/threaded.py)
-- stores python objects
-- filters, see below
-- [inserting 200 objects takes ~0.0003 seconds](tests/all.py#L74) (i7-4702MQ)
-- size of db with 800 objects is ~600kB 
-- ~120 loc
-- no extra package dependencies
-- [tes](tests/all.py)[ted](tests/huge.py)
-- [10-11k inserts per second](tests/huge.py) (i7-4702MQ)
+- [X] pure python
+- [X] [thread safe](tests/threaded.py)
+- [X] stores python objects
+- [X] filters, see below
+- [X] [inserting 200 objects takes ~0.0003 seconds](tests/all.py#L74) (i7-4702MQ)
+    - size of db with 800 objects is ~600kB 
+- [X] ~120 loc
+- [X] no extra package dependencies
+- [X] [tes](tests/all.py)[ted](tests/huge.py)
+- [X] [10-11k inserts per second](tests/huge.py) (i7-4702MQ)
+    - [mongodb inserts @ 1.3k per sec max](tests/mongocomp.py) (i7-4702MQ)
 
 ## notes
 
 - [1 million entry db is 1.3GB](tests/huge.db)
+    - [mongodb 1 mil collection is 143MB](tests/mongocomp.py)
 - [not multiprocess safe (yet?)](tests/processed.py)
 
 ## functions
