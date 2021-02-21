@@ -1,6 +1,7 @@
 from uuid import uuid4
 import shelve
 from datetime import datetime
+from typing import List
 
 
 FMT_TIMESTAMP = "%Y.%m.%d %H:%M:%S"
@@ -19,7 +20,7 @@ class DB(object):
         self.db = shelve.open(name)
 
     @staticmethod
-    def has_keys(d: dict, keys: list[str]) -> bool:
+    def has_keys(d: dict, keys: List[str]) -> bool:
         for k in keys:
             if k not in d.keys():
                 return False
@@ -44,7 +45,6 @@ class DB(object):
         if o.uuid in self.db.keys() and not upsert:
             return False
         self.db[o.uuid] = o
-        self.db.sync()
         return True
 
     def insert_many(self, lst: list, upsert=False) -> bool:
@@ -60,7 +60,6 @@ class DB(object):
         o.last_modified = datetime.now()
         o = self.update_values(old, o)
         self.db[o.uuid] = o
-        self.db.sync()
         return True
 
     def update_many(self, lst: list, upsert=False) -> bool:
@@ -75,7 +74,6 @@ class DB(object):
             self.db[o.uuid].__dict__.update(o.__dict__)
         else:
             self.db[o.uuid] = o
-        self.db.sync()
 
     def upsert_many(self, lst: list) -> None:
         for e in lst:
