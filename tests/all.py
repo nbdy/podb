@@ -5,7 +5,7 @@ import unittest
 from time import time, sleep
 from datetime import datetime
 from copy import deepcopy
-from . import TestObject
+from tests import TestObject
 
 db = DB("test")
 
