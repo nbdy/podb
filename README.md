@@ -16,6 +16,7 @@ thread safe, file based, redis style database for python objects
 ## reasons to use this
 
 - [X] pure python
+- [X] cross-platform (Tested: Windows & Linux)
 - [X] [thread safe](tests/threaded.py)
 - [X] stores python objects
 - [X] filters, see below

@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    long_description=open("README.rst", "r").read(),
+    long_description=open("README.md", "r").read(),
     name="podb",
     version="1.42.1",
     description="python object database",
@@ -17,5 +17,6 @@ setup(
     ],
     keywords="python object database",
     packages=find_packages(),
-    install_requires=["setuptools"]
+    install_requires=["setuptools"],
+    long_description_content_type="text/markdown",
 )
