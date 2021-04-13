@@ -22,16 +22,17 @@ thread safe, file based, redis style database for python objects
 - [X] filters, see below
 - [X] [inserting 200 objects takes ~0.0003 seconds](tests/all.py#L74) (i7-4702MQ)
     - size of db with 800 objects is ~600kB 
-- [X] ~120 loc
+- [X] ~180 loc
 - [X] no extra package dependencies
-- [X] [tes](tests/all.py)[ted](tests/huge.py)
-- [X] [10-11k inserts per second](tests/huge.py) (i7-4702MQ)
-    - [mongodb inserts @ 1.3k per sec max](tests/mongocomp.py) (i7-4702MQ)
+- [X] [tes](tests/all.py)[ted](tests/huge.py) (Ryzen 7 2700X)
+  - [X] [8-8.3k inserts per second](tests/huge.py) 
+  - [X] 1000000 entry db is 672MB
+    - [mongodb 1 mil collection is 143MB](tests/mongocomp.py)
+  - [X] 1000000 entries in 2:04 minutes
+    - [mongodb inserts @ 2-2.3k per sec](tests/mongocomp.py)
 
 ## notes
 
-- [1 million entry db is 1.3GB](tests/huge.db)
-    - [mongodb 1 mil collection is 143MB](tests/mongocomp.py)
 - [not multiprocess safe (yet?)](tests/processed.py)
 
 ## functions
