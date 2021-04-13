@@ -2,6 +2,7 @@ from uuid import uuid4
 import shelve
 from datetime import datetime
 from typing import List
+from filelock import FileLock
 
 
 FMT_TIMESTAMP = "%Y.%m.%d %H:%M:%S"
@@ -16,8 +17,9 @@ class DBEntry(object):
 
 
 class DB(object):
-    def __init__(self, name: str):
-        self.db = shelve.open(name)
+    def __init__(self, path: str):
+        self.db = shelve.open(path)
+        self._lock = FileLock(path)
 
     @staticmethod
     def has_keys(d: dict, keys: List[str]) -> bool:
@@ -41,51 +43,66 @@ class DB(object):
             o.__dict__[k] = v
         return o
 
-    def insert(self, o, upsert=False) -> bool:
+    def _insert(self, o, upsert=False) -> bool:
         if o.uuid in self.db.keys() and not upsert:
             return False
         self.db[o.uuid] = o
+
+    def insert(self, o, upsert=False) -> bool:
+        with self._lock:
+            self._insert(o, upsert)
         return True
 
     def insert_many(self, lst: list, upsert=False) -> bool:
-        for e in lst:
-            if not self.insert(e, upsert):
-                return False
+        with self._lock:
+            for e in lst:
+                self._insert(e, upsert)
         return True
 
-    def update(self, o, upsert=False) -> bool:
+    def _update(self, o, upsert=False) -> bool:
         if o.uuid not in self.db.keys() and not upsert:
             return False
         old = self.db[o.uuid]
         o.last_modified = datetime.now()
         o = self.update_values(old, o)
         self.db[o.uuid] = o
+
+    def update(self, o, upsert=False) -> bool:
+        with self._lock:
+            self._update(o, upsert)
         return True
 
     def update_many(self, lst: list, upsert=False) -> bool:
-        for e in lst:
-            if not self.update(e, upsert):
-                return False
+        with self._lock:
+            for e in lst:
+                if not self._update(e, upsert):
+                    return False
         return True
 
-    def upsert(self, o) -> None:
+    def _upsert(self, o) -> None:
         if o.uuid in self.db.keys():
             o.last_modified = datetime.now()
             self.db[o.uuid].__dict__.update(o.__dict__)
         else:
             self.db[o.uuid] = o
 
+    def upsert(self, o) -> None:
+        with self._lock:
+            self._upsert(o)
+
     def upsert_many(self, lst: list) -> None:
-        for e in lst:
-            self.upsert(e)
+        with self._lock:
+            for e in lst:
+                self._upsert(e)
 
     def match(self, fltr, n=0) -> list:
         r = []
-        for v in self.db.values():
-            if 0 < n < len(r):
-                break
-            if fltr(v.__dict__):
-                r.append(v)
+        with self._lock:
+            for v in self.db.values():
+                if 0 < n < len(r):
+                    break
+                if fltr(v.__dict__):
+                    r.append(v)
         return r
 
     def find(self, query: dict, n=0) -> list:
@@ -134,23 +151,27 @@ class DB(object):
         return self.find_one(query) is not None
 
     def columns(self) -> list:
-        if self.size() > 0:
-            return self.db.values()[0].__dict__.keys()
+        with self._lock:
+            if self.size() > 0:
+                return self.db.values()[0].__dict__.keys()
         return []
 
     def drop(self):
-        self.db.clear()
+        with self._lock:
+            self.db.clear()
 
     def remove(self, fltr: dict):
         for i in self.find(fltr):
-            del self.db[i.uuid]
+            with self._lock:
+                del self.db[i.uuid]
 
     def delete(self, fltr: dict):
         self.remove(fltr)
 
     def remove_by_uuid(self, uuid: str):
         if uuid in self.db.keys():
-            del self.db[uuid]
+            with self._lock:
+                del self.db[uuid]
 
     def delete_by_uuid(self, uuid: str):
         self.remove_by_uuid(uuid)
