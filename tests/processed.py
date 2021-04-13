@@ -1,6 +1,6 @@
 from multiprocessing import Pool, cpu_count
 from podb import DB
-from . import HugeDBItem
+from tests import HugeDBItem
 
 db = DB("processed")
 
