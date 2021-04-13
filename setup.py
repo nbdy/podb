@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     long_description=open("README.md", "r").read(),
     name="podb",
-    version="1.42.2",
+    version="1.43",
     description="python object database",
     author="Pascal Eberlein",
     author_email="pascal@eberlein.io",
@@ -17,6 +17,6 @@ setup(
     ],
     keywords="python object database",
     packages=find_packages(),
-    install_requires=["setuptools"],
+    install_requires=["setuptools", "filelock"],
     long_description_content_type="text/markdown",
 )
