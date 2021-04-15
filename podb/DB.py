@@ -19,7 +19,7 @@ class DBEntry(object):
 class DB(object):
     def __init__(self, path: str):
         self.db = shelve.open(path)
-        self._lock = FileLock(path)
+        self._lock = FileLock(path + ".lock")
 
     @staticmethod
     def has_keys(d: dict, keys: List[str]) -> bool:
