@@ -168,17 +168,23 @@ class DB(object):
     def delete(self, fltr: dict):
         self.remove(fltr)
 
-    def remove_by_uuid(self, uuid: str):
+    def remove_by_uuid(self, uuid: str) -> bool:
         if uuid in self.db.keys():
             with self._lock:
                 del self.db[uuid]
+            return True
+        return False
 
     def delete_by_uuid(self, uuid: str):
         self.remove_by_uuid(uuid)
 
-    def delete_before(self, before: datetime, key="created"):
+    def delete_before(self, before: datetime, key="created") -> int:
+        r = 0
         for i in self.find_after(before, key):
-            self.remove_by_uuid(i.uuid)
+            with self._lock:
+                self.db.pop(i.uuid)
+            r += 1
+        return r
 
     def all(self):
         return self.db.items()
