@@ -31,10 +31,6 @@ thread safe, file based, redis style database for python objects
   - [X] 1000000 entries in 2:04 minutes
     - [mongodb inserts @ 2-2.3k per sec](tests/mongocomp.py)
 
-## notes
-
-- [not multiprocess safe (yet?)](tests/processed.py)
-
 ## functions
 
 - find
@@ -58,6 +54,7 @@ thread safe, file based, redis style database for python objects
 - remove / delete
 - remove_by_uuid / delete_by_uuid
 - delete_before
+- all
 
 ## example
 

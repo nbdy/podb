@@ -179,3 +179,6 @@ class DB(object):
     def delete_before(self, before: datetime, key="created"):
         for i in self.find_after(before, key):
             self.remove_by_uuid(i.uuid)
+
+    def all(self):
+        return self.db.items()
