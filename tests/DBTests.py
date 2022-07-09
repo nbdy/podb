@@ -1,6 +1,5 @@
 import unittest
 from podb import DB, DBEntry
-from os.path import isfile
 
 
 class Person(DBEntry):
@@ -56,12 +55,6 @@ class DBTests(unittest.TestCase):
         self.assertTrue(db.insert(Person("Lincoln")))
         self.assertEqual(len(db.find_contains("name", "ncol")), 1)
         self.assertTrue(db.drop())
-
-    def test_find_before(self):
-        db = DB("test")
-        self.assertTrue(db.insert(Person("John")))
-        self.assertEqual(len(db.find_contains("name", "Jo")), 1)
-        self.assertTrue(db.drop())
         self.assertIsNone(db.find_one({"name": "John"}))
 
     def test_find_by_uuid(self):
@@ -69,4 +62,13 @@ class DBTests(unittest.TestCase):
         entry = Person("Johnathan")
         self.assertTrue(db.insert(entry))
         self.assertEqual(db.find_by_uuid(entry.uuid).name, entry.name)
+        self.assertTrue(db.drop())
+
+    def test_get_random_list(self):
+        db = DB("test")
+        self.assertTrue(db.insert_many([
+            Person("Macy"), Person("Tom"), Person("Linda"),
+            Person("Paul"), Person("Anja"), Person("Mike")
+        ]))
+        self.assertEqual(len(db.get_random_list(2)), 2)
         self.assertTrue(db.drop())

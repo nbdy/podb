@@ -51,10 +51,12 @@ thread safe, file based, redis style database for python objects
 - contains
 - columns
 - drop
-- remove / delete
-- remove_by_uuid / delete_by_uuid
+- delete
+- delete_by_uuid
 - delete_before
-- all
+- get_all
+- get_random
+- get_random_list
 
 ## example
 

@@ -3,6 +3,7 @@ import shelve
 from datetime import datetime
 from typing import List
 from filelock import FileLock
+from random import randint
 
 
 FMT_TIMESTAMP = "%Y.%m.%d %H:%M:%S"
@@ -194,3 +195,9 @@ class DB(object):
 
     def get_all(self):
         return self.db.items()
+
+    def get_random(self):
+        return self.db[list(self.db.keys())[randint(0, len(self.db.keys()) - 1)]]
+
+    def get_random_list(self, n: int):
+        return [self.get_random() for x in range(n)]
