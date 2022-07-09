@@ -23,7 +23,6 @@ thread safe, file based, redis style database for python objects
 - [X] [inserting 200 objects takes ~0.0003 seconds](tests/all.py#L74) (i7-4702MQ)
     - size of db with 800 objects is ~600kB 
 - [X] ~180 loc
-- [X] no extra package dependencies
 - [X] [tes](tests/all.py)[ted](tests/huge.py) (Ryzen 7 2700X)
   - [X] [8-8.3k inserts per second](tests/huge.py) 
   - [X] 1000000 entry db is 672MB
