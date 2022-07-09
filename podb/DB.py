@@ -13,7 +13,8 @@ class DBEntry(object):
         self.uuid = str(uuid4())
         self.created = datetime.now()
         self.last_modified = self.created
-        self.__dict__.update(kwargs)
+        for k, v in kwargs.items():
+            self.__dict__[k] = v
 
 
 class DB(object):
@@ -47,17 +48,16 @@ class DB(object):
         if o.uuid in self.db.keys() and not upsert:
             return False
         self.db[o.uuid] = o
-
-    def insert(self, o, upsert=False) -> bool:
-        with self._lock:
-            self._insert(o, upsert)
         return True
+
+    def insert(self, o: DBEntry, upsert=False) -> bool:
+        return self._insert(o, upsert)
 
     def insert_many(self, lst: list, upsert=False) -> bool:
-        with self._lock:
-            for e in lst:
-                self._insert(e, upsert)
-        return True
+        r = []
+        for e in lst:
+            r.append(self._insert(e, upsert))
+        return all(r)
 
     def _update(self, o, upsert=False) -> bool:
         if o.uuid not in self.db.keys() and not upsert:
@@ -144,39 +144,45 @@ class DB(object):
             return v[key].endswith(value)
         return self.match(fltr, n)
 
+    def find_all_with_key(self, key: str, n=0):
+        def fltr(v: dict):
+            return key in v.keys()
+        return self.match(fltr, n)
+
     def size(self):
         return len(self.db.keys())
 
     def contains(self, query: dict):
         return self.find_one(query) is not None
 
-    def columns(self) -> list:
+    def get_columns(self) -> list:
+        r = []
         with self._lock:
-            if self.size() > 0:
-                return self.db.values()[0].__dict__.keys()
-        return []
+            for item in self.db.values():
+                for key in item.__dict__.keys():
+                    if key not in r:
+                        r.append(key)
+        return r
 
     def drop(self):
         with self._lock:
             self.db.clear()
+        return self.size() == 0
 
-    def remove(self, fltr: dict):
+    def delete(self, fltr: dict):
+        r = 0
         for i in self.find(fltr):
             with self._lock:
                 del self.db[i.uuid]
+            r += 1
+        return r > 0
 
-    def delete(self, fltr: dict):
-        self.remove(fltr)
-
-    def remove_by_uuid(self, uuid: str) -> bool:
+    def delete_by_uuid(self, uuid: str):
         if uuid in self.db.keys():
             with self._lock:
                 del self.db[uuid]
             return True
         return False
-
-    def delete_by_uuid(self, uuid: str):
-        self.remove_by_uuid(uuid)
 
     def delete_before(self, before: datetime, key="created") -> int:
         r = 0
@@ -186,5 +192,5 @@ class DB(object):
             r += 1
         return r
 
-    def all(self):
+    def get_all(self):
         return self.db.items()
