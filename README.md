@@ -9,8 +9,9 @@
 thread safe, file based, redis style database for python objects
 
 ## reasons not to use this
+
 - you want a database cluster
-- you have multiple millions or billions of database entries and limited storage space
+- you have multiple billions of database entries and limited storage space
 - you need relationships
 
 ## reasons to use this
