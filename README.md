@@ -6,7 +6,12 @@
 
 ## (p)ython (o)bject (d)ata(b)ase
 
-thread safe, file based, redis style database for python objects
+thread safe, file based, redis style database for python objects<br>
+<details><summary></summary>
+
+it really just is [shelve](https://docs.python.org/3/library/shelve.html) with a hat on
+
+</details>
 
 ## reasons not to use this
 
