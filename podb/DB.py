@@ -169,7 +169,9 @@ class DB(object):
 
     def get_random(self):
         return self.database[
-            list(self.database.keys())[randint(0, len(self.database.keys()) - 1)]
+            list(self.database.keys())[
+                randint(0, len(self.database.keys()) - 1)
+            ]
         ]
 
     def get_random_list(self, n: int):
