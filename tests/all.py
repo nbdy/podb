@@ -80,6 +80,7 @@ class DBTestMethods(unittest.TestCase):
         while not avg_queue.empty():
             avg_result = avg_queue.get()
             self.assertLess(avg_result, 0.2, "processing time is lesser than 0.2 seconds")
+            print(avg_result)
         self.assertEqual(db.size(), 800, "db has size of {0} not 800".format(db.size()))
 
     def test_get_after(self):
