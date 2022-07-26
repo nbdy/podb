@@ -30,20 +30,13 @@ class DB(object):
                 return False
         return True
 
-    @staticmethod
-    def k_v_match(d: dict, c: dict) -> bool:
-        if not DB.has_keys(d, list(c.keys())):
+    def k_v_match(self, d: dict, c: dict) -> bool:
+        if not self.has_keys(d, list(c.keys())):
             return False
         for k in c.keys():
             if d[k] != c[k]:
                 return False
         return True
-
-    @staticmethod
-    def update_values(o, n):
-        for k, v in n.__dict__.items():
-            o.__dict__[k] = v
-        return o
 
     def _insert(self, o, upsert=False) -> bool:
         if o.uuid in self.db.keys() and not upsert:
@@ -55,30 +48,25 @@ class DB(object):
         return self._insert(o, upsert)
 
     def insert_many(self, lst: list, upsert=False) -> bool:
-        r = []
-        for e in lst:
-            r.append(self._insert(e, upsert))
-        return all(r)
+        return all([self._insert(item, upsert) for item in lst])
 
     def _update(self, o, upsert=False) -> bool:
         if o.uuid not in self.db.keys() and not upsert:
             return False
         old = self.db[o.uuid]
-        o.last_modified = datetime.now()
-        o = self.update_values(old, o)
-        self.db[o.uuid] = o
+        for key, value in o.__dict__.items():
+            old.__dict__[key] = value
+        old.last_modified = datetime.now()
+        self.db[o.uuid] = old
+        return True
 
     def update(self, o, upsert=False) -> bool:
         with self._lock:
-            self._update(o, upsert)
-        return True
+            return self._update(o, upsert)
 
-    def update_many(self, lst: list, upsert=False) -> bool:
+    def update_many(self, lst: list, upsert=False) -> List[bool]:
         with self._lock:
-            for e in lst:
-                if not self._update(e, upsert):
-                    return False
-        return True
+            return [self._update(item, upsert) for item in lst]
 
     def _upsert(self, o) -> None:
         if o.uuid in self.db.keys():
@@ -93,8 +81,7 @@ class DB(object):
 
     def upsert_many(self, lst: list) -> None:
         with self._lock:
-            for e in lst:
-                self._upsert(e)
+            [self._upsert(item) for item in lst]
 
     def match(self, fltr, n=0) -> list:
         r = []
@@ -141,9 +128,7 @@ class DB(object):
         return self.match(fltr, n)
 
     def find_endswith(self, key: str, value: str, n=0):
-        def fltr(v: dict):
-            return v[key].endswith(value)
-        return self.match(fltr, n)
+        return self.match(lambda v: v[key].endswith(value), n)
 
     def find_all_with_key(self, key: str, n=0):
         def fltr(v: dict):

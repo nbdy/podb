@@ -39,18 +39,20 @@ class DBTestMethods(unittest.TestCase):
     def test_update(self):
         print("test_update")
         t0 = TestObject.random()
-        db.insert(t0)
-        t1 = deepcopy(t0)
-        t0.age *= 2
-        t0.size *= 2
-        self.assertGreater(t0.age, t1.age, "age is not greater than before")
-        self.assertGreater(t0.size, t1.size, "size is not greater than before")
+        db.insert(t0)  # we create a random object
+        t1 = deepcopy(t0)  # we create an independent copy of it
+        t0.age *= 2  # modify the original object
+        t0.size *= 2  # twice
+        self.assertGreater(t0.age, t1.age, "the ages of the objects should differ")
+        self.assertGreater(t0.size, t1.size, "the size value should differ")
+        last_modified = t0.last_modified
         self.assertTrue(db.update(t0), "update failed")
-        del t0
-        t0 = db.find_by_uuid(t1.uuid)
-        self.assertIsNotNone(t0, "find_by_uuid returned None")
-        self.assertGreater(t0.size, t1.size, "not greater than original objects age")
-        self.assertGreater(t0.age, t1.age, "not greater than original objects age")
+        self.assertNotEqual(last_modified, db.find_by_uuid(t0.uuid).last_modified, "last modified should have changed")
+        del t0  # let's delete the original
+        t0 = db.find_by_uuid(t1.uuid)  # and fetch it again by uuid
+        self.assertIsNotNone(t0, "we could not find the original object")
+        self.assertNotEqual(t0.age, t1.age, "the ages should differ, as before")
+        self.assertNotEqual(t0.size, t1.size, "the sizes should differ too again")
 
     def test_timings(self):
         db.drop()
