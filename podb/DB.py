@@ -94,9 +94,7 @@ class DB(object):
         return r
 
     def find(self, query: dict, n=0) -> list:
-        def fltr(v: dict):
-            return self.k_v_match(v, query)
-        return self.match(fltr, n)
+        return self.match(lambda v: self.k_v_match(v, query), n)
 
     def find_by_uuid(self, uuid):
         return self.db.get(uuid)
@@ -108,32 +106,22 @@ class DB(object):
         return None
 
     def find_after(self, timestamp: datetime, key="created", n=0) -> list:
-        def fltr(v: dict):
-            return v[key] > timestamp
-        return self.match(fltr, n)
+        return self.match(lambda v: v[key] > timestamp, n)
 
     def find_before(self, timestamp: datetime, key="created", n=0) -> list:
-        def fltr(v: dict):
-            return v[key] < timestamp
-        return self.match(fltr, n)
+        return self.match(lambda v: v[key] < timestamp, n)
 
     def find_contains(self, key: str, value: str, n=0):
-        def fltr(v: dict):
-            return value in v[key]
-        return self.match(fltr, n)
+        return self.match(lambda v: value in v[key], n)
 
     def find_startswith(self, key: str, value: str, n=0):
-        def fltr(v: dict):
-            return v[key].startswith(value)
-        return self.match(fltr, n)
+        return self.match(lambda v: v[key].startswith(value), n)
 
     def find_endswith(self, key: str, value: str, n=0):
         return self.match(lambda v: v[key].endswith(value), n)
 
     def find_all_with_key(self, key: str, n=0):
-        def fltr(v: dict):
-            return key in v.keys()
-        return self.match(fltr, n)
+        return self.match(lambda v: key in v.keys(), n)
 
     def size(self):
         return len(self.db.keys())
@@ -145,10 +133,8 @@ class DB(object):
         r = []
         with self._lock:
             for item in self.db.values():
-                for key in item.__dict__.keys():
-                    if key not in r:
-                        r.append(key)
-        return r
+                r += list(set(item.__dict__.keys()))
+        return list(set(r))
 
     def drop(self):
         with self._lock:
@@ -185,4 +171,4 @@ class DB(object):
         return self.db[list(self.db.keys())[randint(0, len(self.db.keys()) - 1)]]
 
     def get_random_list(self, n: int):
-        return [self.get_random() for x in range(n)]
+        return [self.get_random() for _ in range(n)]
